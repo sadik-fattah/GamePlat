@@ -36,7 +36,7 @@ import static java.util.Locale.filter;
 
 public class MainActivity extends AppCompatActivity {
 
- private final String JSON_URL ="https://raw.githubusercontent.com/sadik-fattah/GamedataBase/main/sitemapgame.json";
+ private final String JSON_URL ="https://raw.githubusercontent.com/sadik-fattah/SimpleDataBase/refs/heads/main/GamePlatforme/sitemapgame.json";
      private JsonArrayRequest request;
     private RequestQueue requestQueue;
     private List<Feed> lsArzone;
