@@ -5,16 +5,6 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
-    <GridView
-        android:id="@+id/gridView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:columnWidth="80dp"
-        android:horizontalSpacing="10dp"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="10dp"
-        android:stretchMode="columnWidth"
-        android:padding="10dp" />
+    tools:context=".Games.Pong">
 
 </androidx.constraintlayout.widget.ConstraintLayout>
