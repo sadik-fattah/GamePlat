@@ -24,7 +24,9 @@
             android:name=".Games.Pong"
             android:exported="false" />
         <activity
-            android:name=".Games.Snak"
+            android:name=".Games.Snake.Snak"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

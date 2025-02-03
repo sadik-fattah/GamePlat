@@ -15,7 +15,7 @@ import com.guercifzone.gameplate.Adapters.GridAdapter;
 import com.guercifzone.gameplate.Games.Breakout;
 import com.guercifzone.gameplate.Games.Invaders;
 import com.guercifzone.gameplate.Games.Pong;
-import com.guercifzone.gameplate.Games.Snak;
+import com.guercifzone.gameplate.Games.Snake.Snak;
 
 public class MainActivity extends AppCompatActivity {
     Integer[] imageIDs = {
