@@ -15,7 +15,7 @@ import com.guercifzone.gameplate.Adapters.GridAdapter;
 import com.guercifzone.gameplate.Games.Breakout;
 import com.guercifzone.gameplate.Games.Invaders;
 import com.guercifzone.gameplate.Games.Pong;
-import com.guercifzone.gameplate.Games.Snake.Snak;
+import com.guercifzone.gameplate.Games.Snake.Snake;
 
 public class MainActivity extends AppCompatActivity {
     Integer[] imageIDs = {
@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         gridView.setOnItemClickListener((parent, view, position, id) -> {
             switch (position) {
                 case 0:
-                    startActivity(new Intent(MainActivity.this, Snak.class));
+                    startActivity(new Intent(MainActivity.this, Snake.class));
                     break;
                 case 1:
                     startActivity(new Intent(MainActivity.this, Pong.class));

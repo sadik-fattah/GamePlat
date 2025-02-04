@@ -15,6 +15,9 @@
         android:theme="@style/Theme.GamePlate"
         tools:targetApi="31">
         <activity
+            android:name=".Games.Snake.Snake"
+            android:exported="false" />
+        <activity
             android:name=".Games.Invaders"
             android:exported="false" />
         <activity
@@ -22,11 +25,6 @@
             android:exported="false" />
         <activity
             android:name=".Games.Pong"
-            android:exported="false" />
-        <activity
-            android:name=".Games.Snake.Snak"
-            android:configChanges="orientation|screenSize"
-            android:screenOrientation="landscape"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
