@@ -41,6 +41,7 @@ private static final int snakeMovingSpeed = 800;
 private  int positionX,positionY;
 private Timer timer;
 private Canvas canvas = null;
+private Paint paintColor = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +60,7 @@ final AppCompatImageButton rightBtn = findViewById(R.id.arrowright);
 final AppCompatImageButton bottomBtn = findViewById(R.id.arrowdown);
 
 surfaceView.getHolder().addCallback(this);
+
 topBtn.setOnClickListener(v -> {
 if(movingPosition.equals("down")){
     movingPosition = "up";
@@ -185,7 +187,18 @@ runOnUiThread(new Runnable() {
           }else{
               canvas = surfaceHolder.lockCanvas();
               canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
-              canvas.drawCircle(snakePositionList.get(0).getPositionX(), snakePositionList.get(0).getPositionY(), pointSize, new Paint());
+              canvas.drawCircle(snakePositionList.get(0).getPositionX(), snakePositionList.get(0).getPositionY(), pointSize, creatPaintColor());
+              canvas.drawCircle(positionX, positionY, pointSize, creatPaintColor());
+              for (int i = 1; i < snakePositionList.size(); i++) {
+                  int gettempPositionX = snakePositionList.get(i).getPositionX();
+                  int gettempPositionY = snakePositionList.get(i).getPositionY();
+               snakePositionList.get(i).setPositionX(hradPositionX);
+               snakePositionList.get(i).setPositionY(hradPositionY);
+               hradPositionX = gettempPositionX;
+               hradPositionY = gettempPositionY;
+                  canvas.drawCircle(snakePositionList.get(i).getPositionX(), snakePositionList.get(i).getPositionY(), pointSize, creatPaintColor());
+              }
+              surfaceHolder.unlockCanvasAndPost(canvas);
 
           }
             }
@@ -194,12 +207,44 @@ runOnUiThread(new Runnable() {
     }
 
     private void growsnake() {
-
+SnakePoints snakePoints = new SnakePoints(0,0);
+snakePositionList.add(snakePoints);
+score++;
+runOnUiThread(new Runnable() {
+    @Override
+    public void run() {
+        scoreTv.setText(String.valueOf(score));
+    }
+});
     }
     private boolean checkGameOver(int headPositionX, int hradPositionY) {
   boolean gameOver = false;
+  if (snakePositionList.get(0).getPositionX() < 0 ||
+          snakePositionList.get(0).getPositionY() < surfaceView.getWidth() ||
+          snakePositionList.get(0).getPositionX() > surfaceView.getWidth() ||
+          snakePositionList.get(0).getPositionY() > surfaceView.getHeight()){
+     gameOver = true;
+  }else {
+      for (int i = 1; i < snakePositionList.size(); i++) {
+          if (headPositionX == snakePositionList.get(i).getPositionX() &&
+                  hradPositionY == snakePositionList.get(i).getPositionY()) {
+              gameOver = true;
+              break;
+          }
+      }
+  }
   return  gameOver;
 
+    }
+    private  Paint creatPaintColor(){
+     if (paintColor  == null){
+         paintColor = new Paint();
+         paintColor.setColor(snakeColor);
+         paintColor.setStyle(Paint.Style.FILL);
+         paintColor.setAntiAlias(true);
+
+     }
+        return paintColor;
     }
 
 }
