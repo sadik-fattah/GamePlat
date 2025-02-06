@@ -1,251 +1,137 @@
 package com.guercifzone.gameplate.Games.Snake;
 
-import android.content.DialogInterface;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.os.Handler;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.guercifzone.gameplate.R;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class Snake extends AppCompatActivity implements SurfaceHolder.Callback {
-private SurfaceView surfaceView;
-private TextView scoreTv;
-private SurfaceHolder surfaceHolder;
-private final List<SnakePoints> snakePositionList = new ArrayList<>();
-private String movingPosition = "right";
-private int score = 0;
-private static final int pointSize = 28;
-private static final int defaultPoints = 3;
-private static final int snakeColor = Color.GREEN;
-private static final int snakeMovingSpeed = 800;
-private  int positionX,positionY;
-private Timer timer;
-private Canvas canvas = null;
-private Paint paintColor = null;
+
+public class Snake extends AppCompatActivity {
+
+    private static final int FPS = 60;
+    private static final int SPEED = 25;
+
+    private static final int STATUS_PAUSED = 1;
+    private static final int STATUS_START = 2;
+    private static final int STATUS_OVER = 3;
+    private static final int STATUS_PLAYING = 4;
+
+    private Snake_GameView mGameView;
+    private TextView mGameStatusText;
+    private TextView mGameScoreText;
+    private Button mGameBtn;
+
+    private final AtomicInteger mGameStatus = new AtomicInteger(STATUS_START);
+
+    private final Handler mHandler = new Handler();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.snake);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        mGameView = findViewById(R.id.game_view);
+        mGameStatusText = findViewById(R.id.game_status);
+        mGameBtn = findViewById(R.id.game_control_btn);
+        mGameScoreText = findViewById(R.id.game_score);
+        mGameView.init();
+        mGameView.setGameScoreUpdatedListener(score -> {
+            mHandler.post(() -> mGameScoreText.setText("Score: " + score));
         });
-  surfaceView = findViewById(R.id.surfaceView);
-  scoreTv = findViewById(R.id.scoreTv);
-final AppCompatImageButton topBtn = findViewById(R.id.arrowUp);
-final AppCompatImageButton leftBtn = findViewById(R.id.arrowleft);
-final AppCompatImageButton rightBtn = findViewById(R.id.arrowright);
-final AppCompatImageButton bottomBtn = findViewById(R.id.arrowdown);
 
-surfaceView.getHolder().addCallback(this);
-
-topBtn.setOnClickListener(v -> {
-if(movingPosition.equals("down")){
-    movingPosition = "up";
-
-}
-});
-leftBtn.setOnClickListener(v -> {
-    if(movingPosition.equals("right")) {
-        movingPosition = "left";
-    }
-});
-rightBtn.setOnClickListener(v -> {
-    if(movingPosition.equals("left")) {
-        movingPosition = "right";
-    }
-});
-bottomBtn.setOnClickListener(v -> {
-    if(movingPosition.equals("up")) {
-        movingPosition = "down";
-    }
-});
-
-    }
-
-    @Override
-    public void surfaceCreated(@NonNull SurfaceHolder holder) {
-  this.surfaceHolder = holder;
-  inity();
-    }
-
-
-
-    @Override
-    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-
-    }
-    private void inity() {
-        snakePositionList.clear();
-        scoreTv.setText("0");
-        score = 0;
-        movingPosition = "right";
-     int startPositionX = (pointSize)* defaultPoints;
-for (int i = 0; i < defaultPoints; i++) {
-    SnakePoints snakePoint = new SnakePoints(startPositionX, pointSize);
-    snakePositionList.add(snakePoint);
-    startPositionX = startPositionX -  (pointSize * 2);
-}
-        addPoint();
-        moveSnake();
-    }
-
-    private void addPoint () {
-        int surfaceWidth = surfaceView.getWidth() - (pointSize * 2);
-        int surfaceHeight = surfaceView.getHeight() - (pointSize * 2);
-int randomXPosition = new Random().nextInt(surfaceWidth / pointSize);
-int randomYPosition = new Random().nextInt(surfaceHeight / pointSize);
-  if ((randomXPosition % 2) != 0){
-      randomXPosition = randomXPosition +1;
-  }
-if ((randomYPosition % 2) != 0){
-    randomYPosition = randomYPosition + 1;
-
-}
-positionX = (pointSize * randomXPosition) + pointSize;
-positionY = (pointSize * randomYPosition) + pointSize;
-
-    }
-
-    private void moveSnake() {
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-              int hradPositionX = snakePositionList.get(0).getPositionX();
-              int hradPositionY = snakePositionList.get(0).getPositionY();
-          if (hradPositionX == positionX && hradPositionY == positionY){
-growsnake();
-addPoint();
-          }
-          switch (movingPosition) {
-              case "right":
-                  snakePositionList.get(0).setPositionX(hradPositionX + (pointSize * 2));
-                  snakePositionList.get(0).setPositionY(hradPositionY);
-                  break;
-              case "left":
-                  snakePositionList.get(0).setPositionX(hradPositionX - (pointSize * 2));
-                  snakePositionList.get(0).setPositionY(hradPositionY);
-                  break;
-                case "up":
-                    snakePositionList.get(0).setPositionX(hradPositionX );
-                    snakePositionList.get(0).setPositionY(hradPositionY - (pointSize * 2));
-                    break;
-              case "down":
-                  snakePositionList.get(0).setPositionX(hradPositionX);
-                  snakePositionList.get(0).setPositionY(hradPositionY + (pointSize * 2));
-                  break;
-
-          }
-          if (checkGameOver(hradPositionX,hradPositionY)){
-              timer.purge();
-              timer.cancel();
-              AlertDialog.Builder builder = new AlertDialog.Builder(Snake.this);
-              builder.setMessage("your score = " + score);
-              builder.setTitle("Game over");
-              builder.setCancelable(false);
-              builder.setPositiveButton("Restart", new DialogInterface.OnClickListener() {
-                  @Override
-                  public void onClick(DialogInterface dialogInterface, int i) {
-inity();
-                  }
-              });
-runOnUiThread(new Runnable() {
-    @Override
-    public void run() {
-        builder.show();
-    }
-});
-
-          }else{
-              canvas = surfaceHolder.lockCanvas();
-              canvas.drawColor(Color.WHITE, PorterDuff.Mode.CLEAR);
-              canvas.drawCircle(snakePositionList.get(0).getPositionX(), snakePositionList.get(0).getPositionY(), pointSize, creatPaintColor());
-              canvas.drawCircle(positionX, positionY, pointSize, creatPaintColor());
-              for (int i = 1; i < snakePositionList.size(); i++) {
-                  int gettempPositionX = snakePositionList.get(i).getPositionX();
-                  int gettempPositionY = snakePositionList.get(i).getPositionY();
-               snakePositionList.get(i).setPositionX(hradPositionX);
-               snakePositionList.get(i).setPositionY(hradPositionY);
-               hradPositionX = gettempPositionX;
-               hradPositionY = gettempPositionY;
-                  canvas.drawCircle(snakePositionList.get(i).getPositionX(), snakePositionList.get(i).getPositionY(), pointSize, creatPaintColor());
-              }
-              surfaceHolder.unlockCanvasAndPost(canvas);
-
-          }
+        findViewById(R.id.up_btn).setOnClickListener(v -> {
+            if (mGameStatus.get() == STATUS_PLAYING) {
+                mGameView.setSnake_Direction(Snake_Direction.UP);
             }
-        }, 1000, snakeMovingSpeed);
+        });
+        findViewById(R.id.down_btn).setOnClickListener(v -> {
+            if (mGameStatus.get() == STATUS_PLAYING) {
+                mGameView.setSnake_Direction(Snake_Direction.DOWN);
+            }
+        });
+        findViewById(R.id.left_btn).setOnClickListener(v -> {
+            if (mGameStatus.get() == STATUS_PLAYING) {
+                mGameView.setSnake_Direction(Snake_Direction.LEFT);
+            }
+        });
+        findViewById(R.id.right_btn).setOnClickListener(v -> {
+            if (mGameStatus.get() == STATUS_PLAYING) {
+                mGameView.setSnake_Direction(Snake_Direction.RIGHT);
+            }
+        });
 
+        mGameBtn.setOnClickListener(v -> {
+            if (mGameStatus.get() == STATUS_PLAYING) {
+                setGameStatus(STATUS_PAUSED);
+            } else {
+                setGameStatus(STATUS_PLAYING);
+            }
+        });
+
+        setGameStatus(STATUS_START);
     }
 
-    private void growsnake() {
-SnakePoints snakePoints = new SnakePoints(0,0);
-snakePositionList.add(snakePoints);
-score++;
-runOnUiThread(new Runnable() {
     @Override
-    public void run() {
-        scoreTv.setText(String.valueOf(score));
-    }
-});
-    }
-    private boolean checkGameOver(int headPositionX, int hradPositionY) {
-  boolean gameOver = false;
-  if (snakePositionList.get(0).getPositionX() < 0 ||
-          snakePositionList.get(0).getPositionY() < surfaceView.getWidth() ||
-          snakePositionList.get(0).getPositionX() > surfaceView.getWidth() ||
-          snakePositionList.get(0).getPositionY() > surfaceView.getHeight()){
-     gameOver = true;
-  }else {
-      for (int i = 1; i < snakePositionList.size(); i++) {
-          if (headPositionX == snakePositionList.get(i).getPositionX() &&
-                  hradPositionY == snakePositionList.get(i).getPositionY()) {
-              gameOver = true;
-              break;
-          }
-      }
-  }
-  return  gameOver;
-
-    }
-    private  Paint creatPaintColor(){
-     if (paintColor  == null){
-         paintColor = new Paint();
-         paintColor.setColor(snakeColor);
-         paintColor.setStyle(Paint.Style.FILL);
-         paintColor.setAntiAlias(true);
-
-     }
-        return paintColor;
+    protected void onPause() {
+        super.onPause();
+        if (mGameStatus.get() == STATUS_PLAYING) {
+            setGameStatus(STATUS_PAUSED);
+        }
     }
 
+    private void setGameStatus(int gameStatus) {
+        int prevStatus = mGameStatus.get();
+        mGameStatusText.setVisibility(View.VISIBLE);
+        mGameBtn.setText("start");
+        mGameStatus.set(gameStatus);
+        switch (gameStatus) {
+            case STATUS_OVER:
+                mGameStatusText.setText("GAME OVER");
+                break;
+            case STATUS_START:
+                mGameView.newGame();
+                mGameStatusText.setText("START GAME");
+                break;
+            case STATUS_PAUSED:
+                mGameStatusText.setText("GAME PAUSED");
+                break;
+            case STATUS_PLAYING:
+                if (prevStatus == STATUS_OVER) {
+                    mGameView.newGame();
+                }
+                startGame();
+                mGameStatusText.setVisibility(View.INVISIBLE);
+                mGameBtn.setText("pause");
+                break;
+        }
+    }
+
+    private void startGame() {
+        final int delay = 1000 / FPS;
+        new Thread(() -> {
+            int count = 0;
+            while (!mGameView.isGameOver() && mGameStatus.get() != STATUS_PAUSED) {
+                try {
+                    Thread.sleep(delay);
+                    if (count % SPEED == 0) {
+                        mGameView.next();
+                        mHandler.post(mGameView::invalidate);
+                    }
+                    count++;
+                } catch (InterruptedException ignored) {
+                }
+            }
+            if (mGameView.isGameOver()) {
+                mHandler.post(() -> setGameStatus(STATUS_OVER));
+            }
+        }).start();
+    }
 }
 
