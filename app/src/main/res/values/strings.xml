@@ -7,7 +7,9 @@
     <string name="dialog_back">Back</string>
 
     <string name="rss_empty">RSS is empty</string>
-
+    <string name="mode_pause">Paused</string>
+    <string name="mode_win">Good work :-)</string>
+    <string name="mode_lose">Sorry :-(</string>
     <string name="pagination_page">Page </string>
     <string name="pagination_of"> of </string>
 </resources>

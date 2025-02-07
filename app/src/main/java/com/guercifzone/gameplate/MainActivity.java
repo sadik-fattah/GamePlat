@@ -14,7 +14,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.guercifzone.gameplate.Adapters.GridAdapter;
 import com.guercifzone.gameplate.Games.Breakout;
 import com.guercifzone.gameplate.Games.Invaders;
-import com.guercifzone.gameplate.Games.Pong;
+import com.guercifzone.gameplate.Games.Pong.Pong;
 import com.guercifzone.gameplate.Games.Snake.Snake;
 
 public class MainActivity extends AppCompatActivity {
