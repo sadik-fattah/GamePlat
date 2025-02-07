@@ -25,6 +25,9 @@
             android:exported="false" />
         <activity
             android:name=".Games.Pong.Pong"
+            android:label="Pong Game"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|keyboardHidden"
             android:exported="false" />
         <activity
             android:name=".MainActivity"
