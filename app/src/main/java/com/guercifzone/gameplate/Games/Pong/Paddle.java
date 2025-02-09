@@ -8,7 +8,8 @@ import android.graphics.Paint;
 
 public class Paddle {
     private float x, y;
-    private float width, height;
+    float width;
+    float height;
     private Paint paint;
 
     public Paddle(float x, float y, float width, float height) {
