@@ -2,98 +2,126 @@ package com.guercifzone.gameplate.Games.Pong;
 
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Message;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.TextView;
 
+/**
+ * A simple Pong game.
+ */
 public class PongView extends SurfaceView implements SurfaceHolder.Callback {
-    private Pong_Thread thread;
-    private Paddle playerPaddle;
-    private Paddle aiPaddle;
-    private Ball ball;
 
-    private int screenWidth;
-    private int screenHeight;
+    private PongThread mGameThread;
 
-    public PongView(Context context) {
-        super(context);
-        getHolder().addCallback(this);
-        thread = new Pong_Thread(getHolder(), this);
+    private TextView mStatusView;
+
+    private TextView mScoreView;
+
+    public PongView(Context context, AttributeSet attributeSet) {
+        super(context, attributeSet);
+
+        SurfaceHolder holder = getHolder();
+        holder.addCallback(this);
+
+        mGameThread = new PongThread(holder, context,
+                new Handler() {
+                    @Override
+                    public void handleMessage(Message m) {
+                        mStatusView.setVisibility(m.getData().getInt("vis"));
+                        mStatusView.setText(m.getData().getString("text"));
+                    }
+                },
+                new Handler() {
+                    @Override
+                    public void handleMessage(Message m) {
+                        mScoreView.setText(m.getData().getString("text"));
+                    }
+                },
+                attributeSet
+        );
+
         setFocusable(true);
     }
 
+    public void setStatusView(TextView textView) {
+        mStatusView = textView;
+    }
+
+    public void setScoreView(TextView textView) {
+        mScoreView = textView;
+    }
+
     @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        screenWidth = getWidth();
-        screenHeight = getHeight();
-
-        // Initialize paddles and ball
-        playerPaddle = new Paddle(screenWidth / 4, screenHeight / 2 - 150, 20, 150);
-        aiPaddle = new Paddle(3 * screenWidth / 4, screenHeight / 2 - 150, 20, 150);
-        ball = new Ball(screenWidth / 2, screenHeight / 2, 20);
-
-        thread.setRunning(true);
-        thread.start();
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        if (!hasWindowFocus) {
+            mGameThread.pause();
+        }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        mGameThread.setSurfaceSize(width, height);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        mGameThread.setRunning(true);
+        mGameThread.start();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         boolean retry = true;
+        mGameThread.setRunning(false);
         while (retry) {
             try {
-                thread.setRunning(false);
-                thread.join();
+                mGameThread.join();
+                retry = false;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                // don't care
             }
-            retry = false;
         }
     }
 
+    private boolean moving;
+    private float   mLastTouchY;
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        float y = event.getY();
-        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-            playerPaddle.setY(y);
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                if (mGameThread.isBetweenRounds()) {
+                    // resume game
+                    mGameThread.setState(PongThread.STATE_RUNNING);
+                } else {
+                    if (mGameThread.isTouchOnHumanPaddle(event)) {
+                        moving = true;
+                        mLastTouchY = event.getY();
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (moving) {
+                    float y = event.getY();
+                    float dy = y - mLastTouchY;
+                    mLastTouchY = y;
+
+                    mGameThread.moveHumanPaddle(dy);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                moving = false;
+                break;
         }
         return true;
     }
 
-    public void update() {
-        ball.update();
-        aiPaddle.update(ball);
-
-        // Check for collisions
-        if (ball.collidesWith(playerPaddle) || ball.collidesWith(aiPaddle)) {
-            ball.reverseXDirection();
-        }
-
-        // Check if ball goes out of bounds
-        if (ball.getX() < 0 || ball.getX() > screenWidth) {
-            ball.reset(screenWidth / 2, screenHeight / 2);
-        }
+    public PongThread getGameThread() {
+        return mGameThread;
     }
 
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-
-        canvas.drawColor(Color.BLACK);
-
-        // Draw paddles and ball
-        playerPaddle.draw(canvas);
-        aiPaddle.draw(canvas);
-        ball.draw(canvas);
-    }
-
-    public void setThreadRunning(boolean running) {
-        thread.setRunning(running);
-    }
 }
